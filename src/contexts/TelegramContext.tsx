@@ -49,81 +49,135 @@ export const TelegramProvider: React.FC<TelegramProviderProps> = ({ children }) 
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Initialize Telegram WebApp
-    WebApp.ready();
-    
-    // Set up the WebApp
-    WebApp.expand();
-    WebApp.enableClosingConfirmation();
-    
-    // Get user data
-    if (WebApp.initDataUnsafe.user) {
-      setUser(WebApp.initDataUnsafe.user as TelegramUser);
+    try {
+      // Check if we're in Telegram WebApp environment
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        // Initialize Telegram WebApp
+        WebApp.ready();
+        
+        // Set up the WebApp
+        WebApp.expand();
+        WebApp.enableClosingConfirmation();
+        
+        // Get user data
+        if (WebApp.initDataUnsafe.user) {
+          setUser(WebApp.initDataUnsafe.user as TelegramUser);
+        }
+        
+        // Set theme
+        setThemeParams(WebApp.themeParams);
+        
+        // Set expanded state
+        setIsExpanded(WebApp.isExpanded);
+        
+        // Setup event listeners
+        WebApp.onEvent('viewportChanged', () => {
+          setIsExpanded(WebApp.isExpanded);
+        });
+        
+        WebApp.onEvent('themeChanged', () => {
+          setThemeParams(WebApp.themeParams);
+        });
+      } else {
+        // Development mode - not in Telegram
+        console.log('Running outside Telegram WebApp environment');
+        setThemeParams({});
+        setIsExpanded(true);
+      }
+      
+      // App is ready
+      setIsReady(true);
+    } catch (error) {
+      console.error('Error initializing Telegram WebApp:', error);
+      setIsReady(true); // Still mark as ready for development
     }
     
-    // Set theme
-    setThemeParams(WebApp.themeParams);
-    
-    // Set expanded state
-    setIsExpanded(WebApp.isExpanded);
-    
-    // App is ready
-    setIsReady(true);
-    
-    // Setup event listeners
-    WebApp.onEvent('viewportChanged', () => {
-      setIsExpanded(WebApp.isExpanded);
-    });
-    
-    WebApp.onEvent('themeChanged', () => {
-      setThemeParams(WebApp.themeParams);
-    });
-    
     return () => {
-      WebApp.offEvent('viewportChanged', () => {});
-      WebApp.offEvent('themeChanged', () => {});
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        WebApp.offEvent('viewportChanged', () => {});
+        WebApp.offEvent('themeChanged', () => {});
+      }
     };
   }, []);
 
+  const isTelegramWebApp = typeof window !== 'undefined' && window.Telegram?.WebApp;
+
   const showMainButton = (text: string, callback: () => void) => {
-    WebApp.MainButton.setText(text);
-    WebApp.MainButton.show();
-    WebApp.MainButton.onClick(callback);
+    if (isTelegramWebApp) {
+      WebApp.MainButton.setText(text);
+      WebApp.MainButton.show();
+      WebApp.MainButton.onClick(callback);
+    } else {
+      // Development mode - could show a regular button or log
+      console.log(`MainButton: ${text}`);
+    }
   };
 
   const hideMainButton = () => {
-    WebApp.MainButton.hide();
-    WebApp.MainButton.offClick(() => {});
+    if (isTelegramWebApp) {
+      WebApp.MainButton.hide();
+      WebApp.MainButton.offClick(() => {});
+    }
   };
 
   const showBackButton = (callback: () => void) => {
-    WebApp.BackButton.show();
-    WebApp.BackButton.onClick(callback);
+    if (isTelegramWebApp) {
+      WebApp.BackButton.show();
+      WebApp.BackButton.onClick(callback);
+    } else {
+      console.log('BackButton shown');
+    }
   };
 
   const hideBackButton = () => {
-    WebApp.BackButton.hide();
-    WebApp.BackButton.offClick(() => {});
+    if (isTelegramWebApp) {
+      WebApp.BackButton.hide();
+      WebApp.BackButton.offClick(() => {});
+    }
   };
 
   const showAlert = (message: string) => {
-    WebApp.showAlert(message);
+    if (isTelegramWebApp) {
+      WebApp.showAlert(message);
+    } else {
+      // Fallback to browser alert in development
+      alert(message);
+    }
   };
 
   const showConfirm = (message: string, callback: (confirmed: boolean) => void) => {
-    WebApp.showConfirm(message, callback);
+    if (isTelegramWebApp) {
+      WebApp.showConfirm(message, callback);
+    } else {
+      // Fallback to browser confirm in development
+      const result = confirm(message);
+      callback(result);
+    }
   };
 
   const hapticFeedback = (type: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => {
-    WebApp.HapticFeedback.impactOccurred(type);
+    if (isTelegramWebApp) {
+      WebApp.HapticFeedback.impactOccurred(type);
+    } else {
+      // No haptic feedback in development, just log
+      console.log(`Haptic feedback: ${type}`);
+    }
   };
 
   const sendData = (data: string) => {
-    WebApp.sendData(data);
+    if (isTelegramWebApp) {
+      WebApp.sendData(data);
+    } else {
+      console.log('Send data:', data);
+    }
   };
 
   const close = () => {
-    WebApp.close();
+    if (isTelegramWebApp) {
+      WebApp.close();
+    } else {
+      console.log('Close app');
+    }
   };
 
   const contextValue: TelegramContextType = {

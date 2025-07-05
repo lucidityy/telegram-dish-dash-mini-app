@@ -68,7 +68,7 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
     if (user && isReady) {
       setFormData(prev => ({
         ...prev,
-        telegram: user.username ? `@${user.username}` : prev.telegram
+        telegram: user.username ? `@${user.username}` : prev.telegram || ""
       }));
     }
   }, [user, isReady]);
@@ -77,18 +77,26 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
   useEffect(() => {
     if (isReady) {
       showBackButton(onBack);
-      updateMainButton();
     }
     
     return () => {
       hideBackButton();
       hideMainButton();
     };
-  }, [isReady, formData, isSubmitting]);
+  }, [isReady]);
+
+  // Update MainButton separately to avoid conflicts
+  useEffect(() => {
+    if (isReady) {
+      updateMainButton();
+    }
+  }, [isReady, isSubmitting, total]);
 
   const updateMainButton = () => {
+    if (!isReady) return;
+    
     if (isSubmitting) {
-      showMainButton('Processing...', () => {});
+      showMainButton('Processing Order...', () => {});
     } else {
       showMainButton(`Complete Order ($${total.toFixed(2)})`, handleSubmit);
     }
@@ -98,24 +106,39 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
     const newErrors: FormErrors = {};
 
     // Validate Telegram handle
-    if (!formData.telegram.trim()) {
+    const telegramHandle = formData.telegram.trim();
+    if (!telegramHandle) {
       newErrors.telegram = "Telegram handle is required";
-    } else if (!formData.telegram.startsWith("@")) {
-      newErrors.telegram = "Telegram handle must start with @";
-    } else if (formData.telegram.length < 5) {
-      newErrors.telegram = "Telegram handle must be at least 5 characters";
+    } else {
+      // Auto-fix telegram handle if it doesn't start with @
+      const fixedHandle = telegramHandle.startsWith("@") ? telegramHandle : `@${telegramHandle}`;
+      if (fixedHandle.length < 3) {
+        newErrors.telegram = "Telegram handle is too short";
+      } else {
+        // Auto-fix the handle in the form data
+        setFormData(prev => ({ ...prev, telegram: fixedHandle }));
+      }
     }
 
-    // Validate phone number
-    if (!formData.phone.trim()) {
+    // Validate phone number - more flexible validation
+    const phoneNumber = formData.phone.trim();
+    if (!phoneNumber) {
       newErrors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-()]{10,}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Please enter a valid phone number";
+    } else {
+      // Remove all spaces, dashes, parentheses for validation
+      const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+      // Check if it has at least 10 digits and optionally starts with +
+      if (!/^\+?\d{10,}$/.test(cleanPhone)) {
+        newErrors.phone = "Please enter a valid phone number (min 10 digits)";
+      }
     }
 
     // Validate delivery address if delivery is selected
-    if (formData.orderType === "delivery" && !formData.deliveryAddress?.trim()) {
-      newErrors.deliveryAddress = "Delivery address is required";
+    if (formData.orderType === "delivery") {
+      const address = formData.deliveryAddress?.trim();
+      if (!address || address.length < 10) {
+        newErrors.deliveryAddress = "Please enter a complete delivery address";
+      }
     }
 
     setErrors(newErrors);
@@ -127,11 +150,62 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
       e.preventDefault();
     }
     
-    if (!validateForm()) {
+    // Validate form before submission
+    const validationErrors: FormErrors = {};
+
+    // Validate Telegram handle
+    const telegramHandle = formData.telegram.trim();
+    if (!telegramHandle) {
+      validationErrors.telegram = "Telegram handle is required";
+    } else {
+      // Auto-fix telegram handle if it doesn't start with @
+      const fixedHandle = telegramHandle.startsWith("@") ? telegramHandle : `@${telegramHandle}`;
+      if (fixedHandle.length < 3) {
+        validationErrors.telegram = "Telegram handle is too short";
+      } else {
+        // Auto-fix the handle in the form data
+        setFormData(prev => ({ ...prev, telegram: fixedHandle }));
+      }
+    }
+
+    // Validate phone number
+    const phoneNumber = formData.phone.trim();
+    if (!phoneNumber) {
+      validationErrors.phone = "Phone number is required";
+    } else {
+      const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+      if (!/^\+?\d{10,}$/.test(cleanPhone)) {
+        validationErrors.phone = "Please enter a valid phone number (min 10 digits)";
+      }
+    }
+
+    // Validate delivery address if delivery is selected
+    if (formData.orderType === "delivery") {
+      const address = formData.deliveryAddress?.trim();
+      if (!address || address.length < 10) {
+        validationErrors.deliveryAddress = "Please enter a complete delivery address";
+      }
+    }
+
+    // Check if there are any validation errors
+    const hasErrors = Object.keys(validationErrors).length > 0;
+    if (hasErrors) {
+      setErrors(validationErrors);
       hapticFeedback('heavy');
-      showAlert("Please fix the errors in the form and try again.");
+      
+      // Build specific error message
+      const errorMessages = [];
+      if (validationErrors.telegram) errorMessages.push("- Telegram handle: " + validationErrors.telegram);
+      if (validationErrors.phone) errorMessages.push("- Phone: " + validationErrors.phone);
+      if (validationErrors.deliveryAddress) errorMessages.push("- Delivery address: " + validationErrors.deliveryAddress);
+      
+      const errorText = `Please fix these errors:\n\n${errorMessages.join('\n')}`;
+      showAlert(errorText);
       return;
     }
+
+    // Clear any existing errors
+    setErrors({});
 
     setIsSubmitting(true);
     hapticFeedback('light');
@@ -162,7 +236,12 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
       
       // Send confirmation to customer (if we have their user ID)
       if (user?.id) {
-        await TelegramBotService.sendOrderConfirmation(orderData, user.id.toString());
+        try {
+          await TelegramBotService.sendOrderConfirmation(orderData, user.id.toString());
+        } catch (confirmError) {
+          console.warn('Failed to send customer confirmation:', confirmError);
+          // Don't fail the entire order if customer confirmation fails
+        }
       }
       
       if (orderNotificationSuccess) {
@@ -170,11 +249,11 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
         showAlert(`Order ${orderId} placed successfully! 🎉\n\nYou'll receive a confirmation message and updates about your order.`);
         onOrderComplete();
       } else {
-        throw new Error('Failed to send order');
+        throw new Error('Failed to send order notification');
       }
     } catch (error) {
       hapticFeedback('heavy');
-      showAlert("Something went wrong. Please try again.");
+      showAlert("Sorry, we couldn't process your order. Please check your internet connection and try again.");
       console.error('Order submission error:', error);
     } finally {
       setIsSubmitting(false);
@@ -183,11 +262,11 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear specific field error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
     hapticFeedback('light');
-    updateMainButton();
   };
 
   return (
