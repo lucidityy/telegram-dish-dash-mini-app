@@ -27,14 +27,12 @@ interface CheckoutProps {
 }
 
 interface FormData {
-  telegram: string;
   phone: string;
   orderType: "pickup" | "delivery";
   deliveryAddress?: string;
 }
 
 interface FormErrors {
-  telegram?: string;
   phone?: string;
   orderType?: string;
   deliveryAddress?: string;
@@ -56,7 +54,6 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
   
   // Initialize form with better defaults for development
   const [formData, setFormData] = useState<FormData>({
-    telegram: "",
     phone: "",
     orderType: "pickup",
     deliveryAddress: ""
@@ -64,16 +61,10 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pre-fill form with Telegram user data
+  // No need to pre-fill anything since we only collect phone number
   useEffect(() => {
     if (user && isReady) {
-      const telegramHandle = user.username ? `@${user.username}` : "";
-      console.log('Auto-filling user data:', { username: user.username, telegramHandle });
-      
-      setFormData(prev => ({
-        ...prev,
-        telegram: telegramHandle || prev.telegram || ""
-      }));
+      console.log('User connected:', { username: user.username, firstName: user.first_name });
     }
   }, [user, isReady]);
 
@@ -116,23 +107,10 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
     // Clear any existing errors first
     setErrors({});
     
-    // Auto-fix Telegram handle
-    let finalTelegramHandle = formData.telegram.trim();
-    if (finalTelegramHandle && !finalTelegramHandle.startsWith("@")) {
-      finalTelegramHandle = `@${finalTelegramHandle}`;
-      setFormData(prev => ({ ...prev, telegram: finalTelegramHandle }));
-    }
-    
     // Get phone number
     const finalPhoneNumber = formData.phone.trim();
     
-    // Very simple validation - just check if fields have content
-    if (!finalTelegramHandle || finalTelegramHandle.length < 2) {
-      hapticFeedback('heavy');
-      showAlert("Please enter your Telegram username (e.g., @yourname)");
-      return;
-    }
-    
+    // Very simple validation - just check phone number
     if (!finalPhoneNumber || finalPhoneNumber.length < 6) {
       hapticFeedback('heavy');
       showAlert("Please enter your phone number");
@@ -157,7 +135,7 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
         items,
         total,
         customerInfo: {
-          telegram: formData.telegram,
+          telegram: user?.username ? `@${user.username}` : "N/A",
           phone: formData.phone,
           firstName: user?.first_name,
           lastName: user?.last_name,
@@ -304,52 +282,27 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
                         Contact Information
                       </h3>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Telegram Handle */}
-                        <div className="space-y-3">
-                          <Label htmlFor="telegram" className="text-food-text-secondary font-medium text-sm xl:text-base">
-                            Telegram Handle *
-                          </Label>
-                          <Input
-                            id="telegram"
-                            type="text"
-                            placeholder="@username"
-                            value={formData.telegram}
-                            onChange={(e) => handleInputChange("telegram", e.target.value)}
-                            className={`h-12 xl:h-14 bg-food-bg-elevated border-food-border-default text-food-text-primary placeholder:text-food-text-muted focus:border-food-primary focus:ring-food-primary transition-colors ${
-                              errors.telegram ? "border-food-danger" : ""
-                            }`}
-                          />
-                          {errors.telegram && (
-                            <div className="flex items-center gap-2 text-food-danger text-sm">
-                              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                              {errors.telegram}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Phone Number */}
-                        <div className="space-y-3">
-                          <Label htmlFor="phone" className="text-food-text-secondary font-medium text-sm xl:text-base">
-                            Phone Number *
-                          </Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            placeholder="+1 (555) 123-4567"
-                            value={formData.phone}
-                            onChange={(e) => handleInputChange("phone", e.target.value)}
-                            className={`h-12 xl:h-14 bg-food-bg-elevated border-food-border-default text-food-text-primary placeholder:text-food-text-muted focus:border-food-primary focus:ring-food-primary transition-colors ${
-                              errors.phone ? "border-food-danger" : ""
-                            }`}
-                          />
-                          {errors.phone && (
-                            <div className="flex items-center gap-2 text-food-danger text-sm">
-                              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                              {errors.phone}
-                            </div>
-                          )}
-                        </div>
+                      {/* Phone Number - Full Width */}
+                      <div className="space-y-3">
+                        <Label htmlFor="phone" className="text-food-text-secondary font-medium text-sm xl:text-base">
+                          Phone Number *
+                        </Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="06 12 34 56 78"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange("phone", e.target.value)}
+                          className={`h-12 xl:h-14 bg-food-bg-elevated border-food-border-default text-food-text-primary placeholder:text-food-text-muted focus:border-food-primary focus:ring-food-primary transition-colors ${
+                            errors.phone ? "border-food-danger" : ""
+                          }`}
+                        />
+                        {errors.phone && (
+                          <div className="flex items-center gap-2 text-food-danger text-sm">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                            {errors.phone}
+                          </div>
+                        )}
                       </div>
                     </div>
 
