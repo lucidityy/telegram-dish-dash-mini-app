@@ -54,6 +54,7 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
     isReady 
   } = useTelegram();
   
+  // Initialize form with better defaults for development
   const [formData, setFormData] = useState<FormData>({
     telegram: "",
     phone: "",
@@ -66,9 +67,12 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
   // Pre-fill form with Telegram user data
   useEffect(() => {
     if (user && isReady) {
+      const telegramHandle = user.username ? `@${user.username}` : "";
+      console.log('Auto-filling user data:', { username: user.username, telegramHandle });
+      
       setFormData(prev => ({
         ...prev,
-        telegram: user.username ? `@${user.username}` : prev.telegram || ""
+        telegram: telegramHandle || prev.telegram || ""
       }));
     }
   }, [user, isReady]);
@@ -102,110 +106,44 @@ export function Checkout({ items, total, onBack, onOrderComplete }: CheckoutProp
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    // Validate Telegram handle
-    const telegramHandle = formData.telegram.trim();
-    if (!telegramHandle) {
-      newErrors.telegram = "Telegram handle is required";
-    } else {
-      // Auto-fix telegram handle if it doesn't start with @
-      const fixedHandle = telegramHandle.startsWith("@") ? telegramHandle : `@${telegramHandle}`;
-      if (fixedHandle.length < 3) {
-        newErrors.telegram = "Telegram handle is too short";
-      } else {
-        // Auto-fix the handle in the form data
-        setFormData(prev => ({ ...prev, telegram: fixedHandle }));
-      }
-    }
-
-    // Validate phone number - more flexible validation
-    const phoneNumber = formData.phone.trim();
-    if (!phoneNumber) {
-      newErrors.phone = "Phone number is required";
-    } else {
-      // Remove all spaces, dashes, parentheses for validation
-      const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
-      // Check if it has at least 10 digits and optionally starts with +
-      if (!/^\+?\d{10,}$/.test(cleanPhone)) {
-        newErrors.phone = "Please enter a valid phone number (min 10 digits)";
-      }
-    }
-
-    // Validate delivery address if delivery is selected
-    if (formData.orderType === "delivery") {
-      const address = formData.deliveryAddress?.trim();
-      if (!address || address.length < 10) {
-        newErrors.deliveryAddress = "Please enter a complete delivery address";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Remove this duplicate validation function - we'll use inline validation in handleSubmit
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
     }
     
-    // Validate form before submission
-    const validationErrors: FormErrors = {};
-
-    // Validate Telegram handle
-    const telegramHandle = formData.telegram.trim();
-    if (!telegramHandle) {
-      validationErrors.telegram = "Telegram handle is required";
-    } else {
-      // Auto-fix telegram handle if it doesn't start with @
-      const fixedHandle = telegramHandle.startsWith("@") ? telegramHandle : `@${telegramHandle}`;
-      if (fixedHandle.length < 3) {
-        validationErrors.telegram = "Telegram handle is too short";
-      } else {
-        // Auto-fix the handle in the form data
-        setFormData(prev => ({ ...prev, telegram: fixedHandle }));
-      }
+    // Clear any existing errors first
+    setErrors({});
+    
+    // Auto-fix Telegram handle
+    let finalTelegramHandle = formData.telegram.trim();
+    if (finalTelegramHandle && !finalTelegramHandle.startsWith("@")) {
+      finalTelegramHandle = `@${finalTelegramHandle}`;
+      setFormData(prev => ({ ...prev, telegram: finalTelegramHandle }));
     }
-
-    // Validate phone number
-    const phoneNumber = formData.phone.trim();
-    if (!phoneNumber) {
-      validationErrors.phone = "Phone number is required";
-    } else {
-      const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
-      if (!/^\+?\d{10,}$/.test(cleanPhone)) {
-        validationErrors.phone = "Please enter a valid phone number (min 10 digits)";
-      }
-    }
-
-    // Validate delivery address if delivery is selected
-    if (formData.orderType === "delivery") {
-      const address = formData.deliveryAddress?.trim();
-      if (!address || address.length < 10) {
-        validationErrors.deliveryAddress = "Please enter a complete delivery address";
-      }
-    }
-
-    // Check if there are any validation errors
-    const hasErrors = Object.keys(validationErrors).length > 0;
-    if (hasErrors) {
-      setErrors(validationErrors);
+    
+    // Get phone number
+    const finalPhoneNumber = formData.phone.trim();
+    
+    // Very simple validation - just check if fields have content
+    if (!finalTelegramHandle || finalTelegramHandle.length < 2) {
       hapticFeedback('heavy');
-      
-      // Build specific error message
-      const errorMessages = [];
-      if (validationErrors.telegram) errorMessages.push("- Telegram handle: " + validationErrors.telegram);
-      if (validationErrors.phone) errorMessages.push("- Phone: " + validationErrors.phone);
-      if (validationErrors.deliveryAddress) errorMessages.push("- Delivery address: " + validationErrors.deliveryAddress);
-      
-      const errorText = `Please fix these errors:\n\n${errorMessages.join('\n')}`;
-      showAlert(errorText);
+      showAlert("Please enter your Telegram username (e.g., @yourname)");
       return;
     }
-
-    // Clear any existing errors
-    setErrors({});
+    
+    if (!finalPhoneNumber || finalPhoneNumber.length < 6) {
+      hapticFeedback('heavy');
+      showAlert("Please enter your phone number");
+      return;
+    }
+    
+    if (formData.orderType === "delivery" && (!formData.deliveryAddress?.trim() || formData.deliveryAddress.trim().length < 5)) {
+      hapticFeedback('heavy');
+      showAlert("Please enter your delivery address");
+      return;
+    }
 
     setIsSubmitting(true);
     hapticFeedback('light');
