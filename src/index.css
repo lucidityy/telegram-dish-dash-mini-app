@@ -1,0 +1,331 @@
+/* Google Fonts - Poppins pour l'esthétique demandée */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Core Colors - Thème Noir/Violet */
+    --background: 240 10% 3.9%;
+    --foreground: 280 15% 95%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 280 15% 95%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 280 15% 95%;
+
+    --primary: 270 91% 65%;
+    --primary-foreground: 240 10% 3.9%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 280 15% 95%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 280 10% 65%;
+
+    --accent: 270 91% 65%;
+    --accent-foreground: 240 10% 3.9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 280 15% 95%;
+
+    /* Food Delivery Color System - Palette Noir/Violet */
+    --food-primary: 270 91% 65%;
+    --food-primary-hover: 270 91% 60%;
+    --food-secondary: 260 85% 55%;
+    --food-secondary-hover: 260 85% 50%;
+    --food-accent: 280 100% 70%;
+    --food-success: 142 76% 36%;
+    --food-warning: 45 93% 58%;
+    --food-danger: 0 84% 60%;
+    
+    /* Surface Colors - Noir/Violet */
+    --food-bg-primary: 240 10% 3.9%;
+    --food-bg-secondary: 240 3.7% 15.9%;
+    --food-bg-elevated: 240 5% 8%;
+    --food-bg-overlay: 280 15% 95% / 0.05;
+    --food-bg-accent: 270 91% 65% / 0.1;
+    
+    /* Border Colors - Tons violets */
+    --food-border-subtle: 240 3.7% 15.9%;
+    --food-border-default: 260 10% 25%;
+    --food-border-strong: 260 15% 35%;
+    --food-border-accent: 270 91% 65% / 0.4;
+    
+    /* Text Colors - Contraste avec le noir */
+    --food-text-primary: 280 15% 95%;
+    --food-text-secondary: 280 10% 75%;
+    --food-text-muted: 280 10% 65%;
+    --food-text-subtle: 280 8% 55%;
+    
+    /* Professional Gradients - Noir/Violet */
+    --gradient-primary: linear-gradient(135deg, hsl(270 91% 65%) 0%, hsl(280 100% 70%) 50%, hsl(260 85% 55%) 100%);
+    --gradient-secondary: linear-gradient(145deg, hsl(240 3.7% 15.9%) 0%, hsl(240 5% 8%) 50%, hsl(240 3.7% 15.9%) 100%);  
+    --gradient-hero: radial-gradient(ellipse 80% 50% at 50% -20%, hsl(270 91% 65% / 0.2) 0%, transparent 60%), linear-gradient(180deg, hsl(240 10% 3.9%) 0%, hsl(240 3.7% 15.9%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(240 5% 8%) 0%, hsl(240 3.7% 15.9%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(270 91% 65% / 0.1) 0%, hsl(280 100% 70% / 0.05) 100%);
+    
+    /* Advanced Shadows - Violet glow */
+    --shadow-xs: 0 1px 2px hsl(240 10% 3.9% / 0.5);
+    --shadow-sm: 0 1px 3px hsl(240 10% 3.9% / 0.6), 0 1px 2px hsl(270 91% 65% / 0.1);
+    --shadow-md: 0 4px 12px hsl(240 10% 3.9% / 0.7), 0 2px 4px hsl(270 91% 65% / 0.15);
+    --shadow-lg: 0 8px 24px hsl(240 10% 3.9% / 0.8), 0 4px 8px hsl(270 91% 65% / 0.2);
+    --shadow-xl: 0 16px 40px hsl(240 10% 3.9% / 0.9), 0 8px 16px hsl(270 91% 65% / 0.25);
+    --shadow-2xl: 0 24px 64px hsl(240 10% 3.9% / 1), 0 12px 24px hsl(270 91% 65% / 0.3);
+    --shadow-glow: 0 0 32px hsl(270 91% 65% / 0.4);
+    --shadow-glow-strong: 0 0 48px hsl(270 91% 65% / 0.6);
+    --shadow-inner: inset 0 1px 3px hsl(240 10% 3.9% / 0.3);
+    
+    /* Animation System */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-elastic: 600ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Spacing Scale */
+    --space-px: 1px;
+    --space-0: 0;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+    --space-32: 8rem;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 270 91% 65%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 240 5% 8%;
+    --sidebar-foreground: 280 15% 95%;
+    --sidebar-primary: 270 91% 65%;
+    --sidebar-primary-foreground: 240 10% 3.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 280 15% 95%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 270 91% 65%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 280 15% 95%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 280 15% 95%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 280 15% 95%;
+
+    --primary: 270 91% 65%;
+    --primary-foreground: 240 10% 3.9%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 280 15% 95%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 280 10% 65%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 280 15% 95%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 280 15% 95%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 270 91% 65%;
+    --sidebar-background: 240 5% 8%;
+    --sidebar-foreground: 280 15% 95%;
+    --sidebar-primary: 270 91% 65%;
+    --sidebar-primary-foreground: 240 10% 3.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 280 15% 95%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 270 91% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-variation-settings: 'opsz' 32;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Typography System - Poppins */
+  .font-display {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
+  }
+  
+  .font-body {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+  
+  /* Text Balance for Headlines */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Custom Scrollbar - Violet theme */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--food-border-default)) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--food-border-default));
+    border-radius: 2px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--food-primary));
+  }
+}
+
+@layer components {
+  /* Glass Effect Components - Violet theme */
+  .glass-card {
+    @apply bg-gradient-glass backdrop-blur-xl border border-food-border-default/30;
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .glass-surface {
+    @apply bg-gradient-secondary backdrop-blur-sm border border-food-border-subtle/50;
+  }
+  
+  /* Premium Button Styles - Violet glow */
+  .btn-premium {
+    @apply relative overflow-hidden bg-gradient-primary text-white font-semibold;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+    @apply transition-all duration-300 ease-out;
+    @apply shadow-lg hover:shadow-glow-strong;
+  }
+  
+  .btn-premium::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0;
+    @apply -translate-x-full transition-transform duration-700;
+  }
+  
+  .btn-premium:hover::before {
+    @apply translate-x-full;
+  }
+  
+  /* Interactive Cards - Violet glow on hover */
+  .card-interactive {
+    @apply transition-all duration-300 ease-out cursor-pointer;
+    @apply hover:scale-[1.02] hover:shadow-glow;
+    @apply active:scale-[0.98];
+  }
+  
+  /* Gradient Text - Violet gradient */
+  .text-gradient {
+    @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+  
+  /* Status Indicators */
+  .status-indicator {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium;
+    @apply bg-food-bg-elevated border border-food-border-default;
+  }
+  
+  .status-indicator.online {
+    @apply border-food-success/30 text-food-success;
+  }
+  
+  .status-indicator.online::before {
+    content: '';
+    @apply w-2 h-2 bg-food-success rounded-full animate-pulse;
+  }
+}
+
+@layer utilities {
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Layout Utilities */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .grid-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  
+  /* Spacing Utilities */
+  .space-y-fluid > * + * {
+    margin-top: clamp(1rem, 4vw, 2rem);
+  }
+  
+  .space-x-fluid > * + * {
+    margin-left: clamp(1rem, 4vw, 2rem);
+  }
+}
